@@ -1,0 +1,65 @@
+riyp-money-tree-bot-solana/
+├── .github/
+│   ├── workflows/
+│   │   ├── anchor-test.yml
+│   │   ├── security-audit.yml
+│   │   └── release.yml
+│   └── PULL_REQUEST_TEMPLATE.md
+├── programs/
+│   └── money-tree-bot/
+│       ├── Cargo.toml
+│       └── src/
+│           ├── lib.rs
+│           ├── instructions/
+│           │   ├── mod.rs
+│           │   ├── initialize_job.rs
+│           │   ├── execute_job.rs
+│           │   └── pause_job.rs
+│           ├── state/
+│           │   ├── mod.rs
+│           │   ├── job_account.rs
+│           │   └── action.rs
+│           ├── constants.rs
+│           └── errors.rs
+├── migrations/
+│   └── deploy.ts
+├── tests/
+│   ├── money-tree-bot.ts
+│   └── utils.ts
+├── client/
+│   ├── lib/
+│   │   ├── client.ts
+│   │   └── instructions.ts
+│   └── cli/
+│       └── index.ts
+├── scripts/
+│   ├── deploy.ts
+│   ├── watcher-service/
+│   │   ├── package.json
+│   │   ├── src/
+│   │   │   ├── index.ts
+│   │   │   ├── triggers/
+│   │   │   │   ├── time-trigger.ts
+│   │   │   │   └── price-trigger.ts
+│   │   │   └── monitors/
+│   │   │       └── job-monitor.ts
+│   │   └── Dockerfile
+│   └── llm-assistant/
+│       ├── package.json
+│       ├── src/
+│       │   ├── index.ts
+│       │   ├── config-generator.ts
+│       │   └── strategies/
+│       │       ├── dca-strategy.ts
+│       │       └── yield-strategy.ts
+│       └── prompts/
+│           └── base-prompt.txt
+├── .env.example
+├── .gitignore
+├── Anchor.toml
+├── package.json
+├── tsconfig.json
+├── README.md
+├── SECURITY.md
+├── CONTRIBUTING.md
+└── docker-compose.yml
