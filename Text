@@ -1,0 +1,104 @@
+
+## **2. GitHub Workflows**
+
+### **`.github/workflows/anchor-test.yml`**
+```yaml
+name: Anchor Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'programs/**'
+      - 'tests/**'
+      - 'Cargo.toml'
+      - 'Anchor.toml'
+      - 'package.json'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'programs/**'
+      - 'tests/**'
+      - 'Cargo.toml'
+      - 'Anchor.toml'
+      - 'package.json'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        solana-version: [1.17.0]
+        node-version: [18.x]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
+
+      - name: Setup Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+          override: true
+
+      - name: Setup Solana ${{ matrix.solana-version }}
+        uses: solana-labs/setup-solana@v1
+        with:
+          solana-version: '${{ matrix.solana-version }}'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          npm install -g yarn
+          yarn install --frozen-lockfile
+
+      - name: Cache Anchor dependencies
+        uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      - name: Build program
+        run: |
+          anchor build
+          ls -la target/deploy/
+
+      - name: Run tests
+        run: |
+          anchor test --skip-local-validator
+        env:
+          ANCHOR_WALLET: ${{ secrets.ANCHOR_WALLET }}
+          ANCHOR_PROVIDER_URL: https://api.devnet.solana.com
+
+      - name: Run lint
+        run: |
+          yarn lint
+          cargo fmt -- --check
+          cargo clippy -- -D warnings
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results
+          path: |
+            test-results/
+            coverage/
